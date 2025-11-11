@@ -1,0 +1,6 @@
+ervices:
+  - type: worker
+    name: NOVA-AI-telegram-bot
+    env: python
+    plan: free
+    startCommand: python nova_ai_bot.py
