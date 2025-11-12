@@ -1113,8 +1113,8 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     usage_tracker.track_chat(chat.id, chat.type, chat.title)
 
-    # Check if user can ask a question
-    if not usage_tracker.can_ask_question(user_id):
+    # Check if user can ask a question (Owner bypass - owner can ask unlimited questions)
+    if not usage_tracker.can_ask_question(user_id) and not is_owner(user_id):
         limit_message = (
             "⚠️ Daily Limit Reached!\n\n"
             "You've already asked your free question today.\n\n"
@@ -1260,8 +1260,8 @@ async def handle_photo_question(update: Update, context: ContextTypes.DEFAULT_TY
     # Get caption as the question, or use default
     question = update.message.caption or "Please analyze this image and explain what you see. If it's a problem, solve it. If it's a diagram, explain it."
 
-    # Check if user can ask a question
-    if not usage_tracker.can_ask_question(user_id):
+    # Check if user can ask a question (Owner bypass - owner can ask unlimited questions)
+    if not usage_tracker.can_ask_question(user_id) and not is_owner(user_id):
         limit_message = (
             "⚠️ Daily Limit Reached!\n\n"
             "You've already asked your free question today.\n\n"
