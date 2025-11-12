@@ -27,9 +27,16 @@ def start_health_server():
 
 if __name__ == '__main__':
     # Start health check server in background thread
+    print("Starting health check server...")
     health_thread = threading.Thread(target=start_health_server, daemon=True)
     health_thread.start()
 
+    # Give the server a moment to start
+    import time
+    time.sleep(2)
+    print("Health check server started successfully")
+
     # Import and run the main bot
     print("Starting Telegram bot...")
-    import main
+    from main import main
+    main()
