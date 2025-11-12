@@ -1051,11 +1051,12 @@ async def broadcast_image_handler(update: Update, context: ContextTypes.DEFAULT_
         return  # Silently ignore non-owner photo messages with #broadcast
 
     caption = update.message.caption or ""
-    logger.info(f"[BROADCAST_IMG] Caption: {caption}")
+    logger.info(f"[BROADCAST_IMG] Caption: '{caption}'")
+    logger.info(f"[BROADCAST_IMG] Caption length: {len(caption)}, First 20 chars: {repr(caption[:20])}")
 
-    # Check if caption starts with #broadcast
-    if not caption.startswith("#broadcast "):
-        logger.info(f"[BROADCAST_IMG] Caption doesn't start with #broadcast, skipping")
+    # Check if caption starts with #broadcast (case-sensitive)
+    if not caption.lower().startswith("#broadcast "):
+        logger.info(f"[BROADCAST_IMG] Caption doesn't start with '#broadcast ', skipping")
         return  # Not a broadcast image
 
     # Parse the caption: #broadcast <target> <message>
@@ -1524,11 +1525,13 @@ def main():
     application.add_handler(CallbackQueryHandler(settings_callback_handler))
 
     # Handle broadcast images from owner (checked first before regular photo questions)
+    # Use a more permissive filter and check inside the handler
     application.add_handler(
         MessageHandler(
-            filters.PHOTO & filters.CAPTION & filters.Regex(r'^#broadcast\s'),
+            filters.PHOTO & filters.CAPTION,
             broadcast_image_handler
-        )
+        ),
+        group=0  # Higher priority group
     )
 
     # Handle photo messages (questions with images)
@@ -1536,7 +1539,8 @@ def main():
         MessageHandler(
             filters.PHOTO,
             handle_photo_question
-        )
+        ),
+        group=1  # Lower priority group
     )
 
     # Handle all text messages (questions without images)
