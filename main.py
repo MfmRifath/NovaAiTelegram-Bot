@@ -1260,6 +1260,21 @@ async def handle_photo_question(update: Update, context: ContextTypes.DEFAULT_TY
     # Get caption as the question, or use default
     question = update.message.caption or "Please analyze this image and explain what you see. If it's a problem, solve it. If it's a diagram, explain it."
 
+    # If caption starts with #broadcast, it should be handled by broadcast handler
+    # This is a safety check in case the handler didn't catch it
+    if question.startswith("#broadcast"):
+        if is_owner(user_id):
+            await update.message.reply_text(
+                "⚠️ **Broadcast Format Error**\n\n"
+                "Make sure your caption starts with:\n"
+                "`#broadcast all <message>`\n"
+                "`#broadcast users <message>`\n"
+                "`#broadcast groups <message>`\n\n"
+                "Note: There must be exactly one space after 'broadcast'",
+                parse_mode=ParseMode.MARKDOWN
+            )
+        return  # Don't process as a question
+
     # Check if user can ask a question (Owner bypass - owner can ask unlimited questions)
     if not usage_tracker.can_ask_question(user_id) and not is_owner(user_id):
         limit_message = (
