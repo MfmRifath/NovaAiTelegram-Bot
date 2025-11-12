@@ -49,6 +49,13 @@ USAGE_FILE = 'user_usage.json'
 NOVA_LEARN_APP_LINK = "https://play.google.com/store/apps/details?id=com.NovaScience.nova_science&ppcampaignidweb_share"
 WHATSAPP_CHANNEL_LINK = "https://whatsapp.com/channel/0029Vb6hoKxBKfhyA1UJ4u2K"
 
+# Advertisement Configuration
+AD_ENABLED = os.getenv('AD_ENABLED', 'false').lower() == 'true'
+AD_TYPE = os.getenv('AD_TYPE', 'text').lower()  # 'text' or 'image'
+AD_TEXT = os.getenv('AD_TEXT', '📢 Download Nova Learn App for unlimited access!')
+AD_IMAGE_FILE_ID = os.getenv('AD_IMAGE_FILE_ID', '')
+AD_IMAGE_CAPTION = os.getenv('AD_IMAGE_CAPTION', '📢 Check out our latest offers!')
+
 
 class UserUsageTracker:
     """Track user question usage per day"""
@@ -736,6 +743,39 @@ async def owner_only(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool
 
 
 # ============================================================================
+# Advertisement Functions
+# ============================================================================
+
+async def send_advertisement(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send advertisement after AI response if enabled"""
+    if not AD_ENABLED:
+        logger.info("[AD] Advertisements disabled")
+        return
+
+    try:
+        if AD_TYPE == 'image' and AD_IMAGE_FILE_ID:
+            # Send image advertisement
+            logger.info(f"[AD] Sending image advertisement to chat {update.effective_chat.id}")
+            await context.bot.send_photo(
+                chat_id=update.effective_chat.id,
+                photo=AD_IMAGE_FILE_ID,
+                caption=AD_IMAGE_CAPTION,
+                parse_mode=ParseMode.MARKDOWN
+            )
+        elif AD_TYPE == 'text' and AD_TEXT:
+            # Send text advertisement
+            logger.info(f"[AD] Sending text advertisement to chat {update.effective_chat.id}")
+            await update.message.reply_text(
+                AD_TEXT,
+                parse_mode=ParseMode.MARKDOWN
+            )
+        else:
+            logger.warning("[AD] Advertisement enabled but no valid ad content configured")
+    except Exception as e:
+        logger.error(f"[AD] Failed to send advertisement: {e}")
+
+
+# ============================================================================
 # Command Handlers
 # ============================================================================
 
@@ -1231,6 +1271,9 @@ async def handle_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         logger.info(f"[BOT] ✅ Response sent successfully to user {user_id}")
 
+        # Send advertisement after successful response
+        await send_advertisement(update, context)
+
     except Exception as e:
         logger.error(f"[BOT] Error processing question: {e}", exc_info=True)
         error_message = (
@@ -1427,6 +1470,9 @@ async def handle_photo_question(update: Update, context: ContextTypes.DEFAULT_TY
                     await asyncio.sleep(0.5)
 
         logger.info(f"[BOT] ✅ Response sent successfully to user {user_id}")
+
+        # Send advertisement after successful response
+        await send_advertisement(update, context)
 
     except Exception as e:
         logger.error(f"[BOT] Error processing photo question: {e}", exc_info=True)
