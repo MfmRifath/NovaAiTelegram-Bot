@@ -1,0 +1,39 @@
+# Git files
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local data files (but keep structure)
+# user_usage.json will be created fresh on deployment
+# ad_config.json will be created when you configure ads
+
+# Environment files
+.env.example
+
+# Documentation
+README.md
+*.md
+
+# Other deployment configs
+render.yaml
