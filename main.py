@@ -2655,16 +2655,24 @@ async def togglead_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def createad_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start creating a new scheduled advertisement (Owner only)"""
+    user_id = update.effective_user.id
+    chat_type = update.effective_chat.type
+    logger.info(f"[CREATEAD] Command triggered by user {user_id} in {chat_type} chat")
+
     if not await owner_only(update, context):
+        logger.warning(f"[CREATEAD] Access denied for user {user_id}")
         return ConversationHandler.END
 
-    if update.effective_chat.type != 'private':
+    if chat_type != 'private':
+        logger.info(f"[CREATEAD] Rejected - not in private chat (type: {chat_type})")
         await update.message.reply_text(
             "⚠️ **Admin Commands in Private Only**\n\n"
             "Please use this command in a direct message with the bot.",
             parse_mode=ParseMode.MARKDOWN
         )
         return ConversationHandler.END
+
+    logger.info(f"[CREATEAD] Starting ad creation wizard for owner {user_id}")
 
     await update.message.reply_text(
         "📢 **Create New Scheduled Advertisement**\n\n"
