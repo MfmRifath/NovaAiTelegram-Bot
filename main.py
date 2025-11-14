@@ -27,6 +27,7 @@ from telegram.ext import (
     PreCheckoutQueryHandler,
     filters,
     ContextTypes,
+    JobQueue,
 )
 from telegram.constants import ParseMode
 
@@ -3618,8 +3619,13 @@ def main():
         logger.error("OPENAI_API_KEY not found in environment variables!")
         return
 
-    # Create application
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    # Create application with JobQueue enabled
+    application = (
+        Application.builder()
+        .token(TELEGRAM_BOT_TOKEN)
+        .job_queue(JobQueue())
+        .build()
+    )
 
     # Add handlers
     application.add_handler(CommandHandler("start", start_command))
