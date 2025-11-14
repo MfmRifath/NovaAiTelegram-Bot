@@ -1403,6 +1403,7 @@ def get_main_keyboard(user_id: int = None) -> ReplyKeyboardMarkup:
             [KeyboardButton("🛒 Buy Credits"), KeyboardButton("❓ Help")],
             [KeyboardButton("⚙️ Settings"), KeyboardButton("📢 Broadcast")],
             [KeyboardButton("📺 Set Ad"), KeyboardButton("🔄 Toggle Ad")],
+            [KeyboardButton("📅 Create Ad"), KeyboardButton("📋 List Ads")],
             [KeyboardButton(ai_button), KeyboardButton("🔗 Links")]
         ]
     else:
@@ -1468,6 +1469,8 @@ async def keyboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /help command"""
+    user_id = update.effective_user.id
+
     help_message = (
         "🆘 NovaAiBot Help\n\n"
         "**Commands:**\n"
@@ -1499,6 +1502,26 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📱 For unlimited access, download: {NOVA_LEARN_APP_LINK}\n"
         f"📢 Join our WhatsApp: {WHATSAPP_CHANNEL_LINK}"
     )
+
+    # Add owner-specific commands if owner is viewing
+    if is_owner(user_id):
+        help_message += (
+            "\n\n"
+            "👑 **Owner Commands** (Private Chat Only):\n"
+            "/settings - Bot settings & statistics\n"
+            "/broadcast - Send messages to users/groups\n"
+            "/addcredits - Add credits to users\n"
+            "/setcredits - Set user credits\n"
+            "/setad - Configure basic advertisement\n"
+            "/togglead - Enable/disable basic ads\n\n"
+            "📅 **Scheduled Ads:**\n"
+            "/createad - Create scheduled advertisement\n"
+            "/listads - View all scheduled ads\n"
+            "/pausead <id> - Pause an ad\n"
+            "/resumead <id> - Resume an ad\n"
+            "/deletead <id> - Delete an ad\n\n"
+            "💡 Use keyboard buttons for quick access!"
+        )
 
     # Show keyboard in private chats
     reply_markup = get_main_keyboard(update.effective_user.id) if update.effective_chat.type == 'private' else None
@@ -1840,6 +1863,10 @@ async def handle_keyboard_buttons(update: Update, context: ContextTypes.DEFAULT_
         await setad_command(update, context)
     elif text == "🔄 Toggle Ad":
         await togglead_command(update, context)
+    elif text == "📅 Create Ad":
+        await createad_command(update, context)
+    elif text == "📋 List Ads":
+        await listads_command(update, context)
     elif text in ["🔇 Disable AI", "🔊 Enable AI"]:
         # Toggle AI response mode for owner
         global OWNER_AI_ENABLED
@@ -3742,7 +3769,7 @@ def main():
     )
 
     # Handle keyboard button presses (must be before general text handler)
-    keyboard_filter = filters.Regex('^(💳 Credits|📊 Status|🛒 Buy Credits|❓ Help|🔗 Links|⚙️ Settings|📢 Broadcast|📺 Set Ad|🔄 Toggle Ad|🔇 Disable AI|🔊 Enable AI)$')
+    keyboard_filter = filters.Regex('^(💳 Credits|📊 Status|🛒 Buy Credits|❓ Help|🔗 Links|⚙️ Settings|📢 Broadcast|📺 Set Ad|🔄 Toggle Ad|📅 Create Ad|📋 List Ads|🔇 Disable AI|🔊 Enable AI)$')
     application.add_handler(
         MessageHandler(
             keyboard_filter & ~filters.COMMAND,
