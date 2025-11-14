@@ -1372,6 +1372,10 @@ async def start_scheduler_task(application):
     """Start the background scheduler task"""
     job_queue = application.job_queue
 
+    if job_queue is None:
+        logger.error("[SCHEDULER] JobQueue not available! Install with: pip install python-telegram-bot[job-queue]")
+        return
+
     # Run every 5 minutes
     job_queue.run_repeating(
         check_and_post_scheduled_ads,
